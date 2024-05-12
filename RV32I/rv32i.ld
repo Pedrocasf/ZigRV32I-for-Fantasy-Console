@@ -9,34 +9,34 @@ ENTRY(_start)
 
 _start = ORIGIN(flash);
 __stack_top = ORIGIN(psram) + LENGTH(psram);
-__global_pointer = ORIGIN(isram) + LENGTH(isram);
+__global_pointer = ORIGIN(isram);
 SECTIONS
 {
     . = _start;
 
-    .text : ALIGN(16) {
+    .text : ALIGN(4) {
         KEEP(*(.rv32imain))
         *(.text)
-        . = ALIGN(16);
+        . = ALIGN(4);
     } > flash
 
     __text_end = .;
 
-    .rodata : ALIGN(16) {
+    .rodata : ALIGN(4) {
         *(.rodata*)
-        . = ALIGN(16);
-    } > flash
+        . = ALIGN(4);
+    } > flash = 0x00
 
     __data_lma = .;
     .data : AT(__data_lma)  {
         __data_start__ = ABSOLUTE(.);
-        KEEP(*(.data))
-        . = ALIGN(16);
+        *(.data)
+        . = ALIGN(4);
         __data_end__ = ABSOLUTE(.);
-    } > psram
+    } > psram = 0xFF
 
     __bss_lma = .;
-    .bss ALIGN(16) (NOLOAD): AT(__bss_lma) {
+    .bss  ALIGN(4) (NOLOAD) : {
         __bss_start__ = ABSOLUTE(.);
         *(.dynbss)
         *(.gnu.linkonce.b*)

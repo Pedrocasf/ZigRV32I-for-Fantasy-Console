@@ -25,105 +25,15 @@ pub const RV32I = struct {
     pub const MAX7219_DAT = bit_to_io(IO_MAX7219_DAT_bit);
     pub const SDCARD = bit_to_io(IO_SDCARD_bit);
     pub const BUTTONS = bit_to_io(IO_BUTTONS_bit);
-    pub fn memcpy32(noalias destination: anytype, noalias source: anytype, count: usize) void {
-        if (count < 4) {
-            genericMemcpy(@as([*]volatile u8, @ptrCast(destination)), @as([*]const u8, @ptrCast(source)), count);
-        } else {
-            if ((@intFromPtr(@as(*volatile u8, @ptrCast(destination))) % 4) == 0 and (@intFromPtr(@as(*const u8, @ptrCast(source))) % 4) == 0) {
-                alignedMemcpy(u32, @as([*]align(4) volatile u8, @ptrCast(@alignCast(destination))), @as([*]align(4) const u8, @ptrCast(@alignCast(source))), count);
-            } else if ((@intFromPtr(@as(*volatile u8, @ptrCast(destination))) % 2) == 0 and (@intFromPtr(@as(*const u8, @ptrCast(source))) % 2) == 0) {
-                alignedMemcpy(u16, @as([*]align(2) volatile u8, @ptrCast(@alignCast(destination))), @as([*]align(2) const u8, @ptrCast(@alignCast(source))), count);
-            } else {
-                genericMemcpy(@as([*]volatile u8, @ptrCast(destination)), @as([*]const u8, @ptrCast(source)), count);
-            }
-        }
-    }
-
-    pub fn memcpy16(noalias destination: anytype, noalias source: anytype, count: usize) void {
-        if (count < 2) {
-            genericMemcpy(@as([*]u8, @ptrCast(destination)), @as([*]const u8, @ptrCast(source)), count);
-        } else {
-            if ((@intFromPtr(@as(*u8, @ptrCast(destination))) % 2) == 0 and (@intFromPtr(@as(*const u8, @ptrCast(source))) % 2) == 0) {
-                alignedMemcpy(u16, @as([*]align(2) volatile u8, @ptrCast(@alignCast(destination))), @as([*]align(2) const u8, @ptrCast(@alignCast(source))), count);
-            } else {
-                genericMemcpy(@as([*]volatile u8, @ptrCast(destination)), @as([*]const u8, @ptrCast(source)), count);
-            }
-        }
-    }
-
-    pub fn alignedMemcpy(comptime T: type, noalias destination: [*]align(@alignOf(T)) volatile u8, noalias source: [*]align(@alignOf(T)) const u8, count: usize) void {
-        @setRuntimeSafety(false);
-        const alignSize = count / @sizeOf(T);
-        const remainderSize = count % @sizeOf(T);
-
-        const alignDestination = @as([*]volatile T, @ptrCast(destination));
-        const alignSource = @as([*]const T, @ptrCast(source));
-
-        var index: usize = 0;
-        while (index != alignSize) : (index += 1) {
-            alignDestination[index] = alignSource[index];
-        }
-
-        index = count - remainderSize;
-        while (index != count) : (index += 1) {
-            destination[index] = source[index];
-        }
-    }
-
-    pub fn genericMemcpy(noalias destination: [*]volatile u8, noalias source: [*]const u8, count: usize) void {
-        @setRuntimeSafety(false);
-        var index: usize = 0;
-        while (index != count) : (index += 1) {
-            destination[index] = source[index];
-        }
-    }
-
-    pub fn memset32(destination: anytype, value: u32, count: usize) void {
-        if ((@intFromPtr(@as(*volatile u8, @ptrCast(destination))) % 4) == 0) {
-            alignedMemset(u32, @as([*]align(4) volatile u8, @ptrCast(@alignCast(destination))), value, count);
-        } else {
-            genericMemset(u32, @as([*]volatile u8, @ptrCast(destination)), value, count);
-        }
-    }
-
-    pub fn memset16(destination: anytype, value: u16, count: usize) void {
-        if ((@intFromPtr(@as(*u8, @ptrCast(destination))) % 4) == 0) {
-            alignedMemset(u16, @as([*]align(2) volatile u8, @ptrCast(@alignCast(destination))), value, count);
-        } else {
-            genericMemset(u16, @as([*]volatile u8, @ptrCast(destination)), value, count);
-        }
-    }
-
-    pub fn alignedMemset(comptime T: type, destination: [*]align(@alignOf(T)) volatile u8, value: T, count: usize) void {
-        @setRuntimeSafety(false);
-        const alignedDestination = @as([*]volatile T, @ptrCast(destination));
-        var index: usize = 0;
-        while (index != count) : (index += 1) {
-            alignedDestination[index] = value;
-        }
-    }
-
-    pub fn genericMemset(comptime T: type, destination: [*]volatile u8, value: T, count: usize) void {
-        @setRuntimeSafety(false);
-        const valueBytes = @as([*]const u8, @ptrCast(&value));
-        var index: usize = 0;
-        while (index != count) : (index += 1) {
-            comptime var expandIndex = 0;
-            inline while (expandIndex < @sizeOf(T)) : (expandIndex += 1) {
-                destination[(index * @sizeOf(T)) + expandIndex] = valueBytes[expandIndex];
-            }
-        }
-    }
-};
+    };
 export fn RV32IMain() linksection(".rv32imain") noreturn {
     asm volatile (
-        \\la sp, __stack_top
-        \\la gp, __global_pointer
-    );
+    \\la sp, __stack_top
+    \\la gp, __global_pointer
+);
     RV32IZigStartup();
 }
 
-extern var __bss_lma: u8;
 extern var __bss_start__: u8;
 extern var __bss_end__: u8;
 extern var __data_lma: u8;
@@ -131,15 +41,22 @@ extern var __data_start__: u8;
 extern var __data_end__: u8;
 
 fn RV32IZigStartup() noreturn {
+    const bss_size = @intFromPtr(&__bss_start__) - @intFromPtr(&__bss_end__);
+
     // Clear .bss
-    RV32I.memset32(@as([*]volatile u8, @ptrCast(&__bss_start__)), 0, @intFromPtr(&__bss_end__) - @intFromPtr(&__bss_start__));
+    @memset(@as([*]volatile u8, @ptrCast(&__bss_start__))[0..bss_size], 0);
+
+    const data_size = @intFromPtr(&__data_start__) - @intFromPtr(&__data_end__);
 
     // Copy .data section to PSRAM
-    RV32I.memcpy32(@as([*]volatile u8, @ptrCast(&__data_start__)), @as([*]const u8, @ptrCast(&__data_lma)), @intFromPtr(&__data_end__) - @intFromPtr(&__data_start__));
+    @memcpy(@as([*]volatile u8, @ptrCast(&__data_start__))[0..data_size], @as([*]const u8, @ptrCast(&__data_lma))[0..data_size]);
 
     // call user's main
     if (@hasDecl(root, "main")) {
         root.main();
     }
+    asm volatile (
+    \\ebreak
+);
     unreachable;
 }
