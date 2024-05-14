@@ -3,6 +3,7 @@ const std = @import("std");
 const RV32ILinkerScript = libRoot() ++ "/rv32i.ld";
 const RV32ILibFile = libRoot() ++ "/rv32i.zig";
 var ElfOrBinOption: ?bool = null;
+var IsDebugOption: ?bool = null;
 const rv32i_target_query = blk: {
     const target = std.Target.Query{
         .cpu_arch = std.Target.Cpu.Arch.riscv32,
@@ -15,14 +16,14 @@ fn libRoot() []const u8 {
     return std.fs.path.dirname(@src().file) orelse ".";
 }
 
-pub fn addRV32IStaticLibrary(b: *std.Build, libraryName: []const u8, sourceFile: []const u8) *std.Build.Step.Compile {
-    const lib = b.addStaticLibrary(.{ .name = libraryName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = .ReleaseFast, .single_threaded = true });
+pub fn addRV32IStaticLibrary(b: *std.Build, libraryName: []const u8, sourceFile: []const u8, opt: std.builtin.OptimizeMode) *std.Build.Step.Compile {
+    const lib = b.addStaticLibrary(.{ .name = libraryName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = opt, .single_threaded = true });
     lib.setLinkerScriptPath(.{ .path = RV32ILinkerScript });
     return lib;
 }
 
-pub fn createRV32ILib(b: *std.Build) *std.Build.Step.Compile {
-    return addRV32IStaticLibrary(b, "ZigRV32I", RV32ILibFile);
+pub fn createRV32ILib(b: *std.Build, opt: std.builtin.OptimizeMode) *std.Build.Step.Compile {
+    return addRV32IStaticLibrary(b, "ZigRV32I", RV32ILibFile, opt);
 }
 pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []const u8) *std.Build.Step.Compile {
     const ElfOrBin = blk: {
@@ -34,7 +35,17 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
             break :blk newElfOrBin;
             }
         };
-    const exe = b.addExecutable(.{ .name = rv32iName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = .ReleaseFast, .single_threaded = true });
+    const IsDebug = blk: {
+        if (IsDebugOption) |value| {
+            break :blk value;
+        } else {
+            const newIsDebug = b.option(bool, "IsDebug", "select if is a debug build") orelse false;
+            IsDebugOption = newIsDebug;
+            break :blk newIsDebug;
+        }
+    };
+
+    const exe = b.addExecutable(.{ .name = rv32iName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = if(IsDebug) .Debug else .ReleaseFast, .single_threaded = true });
 
     exe.setLinkerScriptPath(.{ .path = RV32ILinkerScript });
     if (ElfOrBin) {
@@ -51,7 +62,7 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
 
     }
 
-    const rv32iLib = createRV32ILib(b);
+    const rv32iLib = createRV32ILib(b, if(IsDebug) .Debug else .ReleaseFast);
     exe.root_module.addAnonymousImport("rv32i", .{ .root_source_file = .{ .path = RV32ILibFile } });
     exe.linkLibrary(rv32iLib);
 
