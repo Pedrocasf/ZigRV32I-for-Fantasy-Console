@@ -16,6 +16,9 @@ fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime I
         pub fn initFromFloat(v: InitFloat) FP {
             return .{ .raw = @floatCast(v * (1 << BinaryScaling)) };
         }
+        pub fn initRaw(v: T) FP {
+            return .{ .raw = v };
+        }
         pub fn unscale(fp: FP) T {
             return fp.raw >> BinaryScaling;
         }
@@ -52,6 +55,18 @@ fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime I
         }
         pub fn max(a: FP, b: FP) FP {
             return if (a.raw > b.raw) a else b;
+        }
+        pub fn shr(a:FP, b:T) FP {
+            return .{ .raw = a.raw >> @as(u5, @intCast(b)) };
+        }
+        pub fn int(a:FP) T {
+            return a.raw >> BinaryScaling;
+        }
+        pub fn abs(a:FP) FP {
+            return .{ .raw = @as(i32, @intCast(@abs(a.raw))) };
+        }
+        pub fn frac(a:FP) FP {
+            return .{ .raw = a.raw & (std.math.maxInt(T) >> (BinaryScaling - @bitSizeOf(T))) };
         }
         pub fn sin(x: FP) FP {
             var xr = x.raw;

@@ -42,15 +42,16 @@ extern var __data_end__: u8;
 
 fn RV32IZigStartup() noreturn {
     const bss_size = @intFromPtr(&__bss_start__) - @intFromPtr(&__bss_end__);
-
     // Clear .bss
-    @memset(@as([*]volatile u8, @ptrCast(&__bss_start__))[0..bss_size], 0);
-
+    if(bss_size>0){
+        @memset(@as([*]volatile u8, @ptrCast(&__bss_start__))[0..bss_size], 0);
+    }
+    
     const data_size = @intFromPtr(&__data_start__) - @intFromPtr(&__data_end__);
-
     // Copy .data section to PSRAM
-    @memcpy(@as([*]volatile u8, @ptrCast(&__data_start__))[0..data_size], @as([*]const u8, @ptrCast(&__data_lma))[0..data_size]);
-
+    if(data_size > 0){
+        @memcpy(@as([*]volatile u8, @ptrCast(&__data_start__))[0..data_size], @as([*]const u8, @ptrCast(&__data_lma))[0..data_size]);
+    }
     // call user's main
     if (@hasDecl(root, "main")) {
         root.main();
