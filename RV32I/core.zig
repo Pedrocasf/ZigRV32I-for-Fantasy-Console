@@ -32,9 +32,9 @@ pub const RV32I = struct {
 };
 export fn RV32IMain() linksection(".rv32imain") noreturn {
     asm volatile (
-    \\la sp, __stack_top
-    \\la gp, __global_pointer
-);
+        \\la sp, __stack_top
+        \\la gp, __global_pointer
+    );
     RV32IZigStartup();
 }
 
@@ -61,7 +61,7 @@ fn RV32IZigStartup() noreturn {
         root.main();
     }
     asm volatile (
-    \\ebreak
-);
+        \\fence.tso
+    );
     unreachable;
 }

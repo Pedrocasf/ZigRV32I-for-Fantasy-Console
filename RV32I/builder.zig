@@ -44,7 +44,6 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
             break :blk newIsDebug;
         }
     };
-
     const exe = b.addExecutable(.{ .name = rv32iName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = if(IsDebug) .Debug else .ReleaseFast, .single_threaded = true });
 
     exe.setLinkerScriptPath(.{ .path = RV32ILinkerScript });
@@ -65,8 +64,6 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
     const rv32iLib = createRV32ILib(b, if(IsDebug) .Debug else .ReleaseFast);
     exe.root_module.addAnonymousImport("rv32i", .{ .root_source_file = .{ .path = RV32ILibFile } });
     exe.linkLibrary(rv32iLib);
-
     b.default_step.dependOn(&exe.step);
-
     return exe;
 }
