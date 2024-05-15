@@ -9,7 +9,7 @@ ENTRY(_start)
 
 _start = ORIGIN(flash);
 __stack_top = ORIGIN(psram) + LENGTH(psram);
-__global_pointer = ORIGIN(isram);
+__global_pointer = ORIGIN(isram) + LENGTH(isram);
 SECTIONS
 {
     . = _start;
