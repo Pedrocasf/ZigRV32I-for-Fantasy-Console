@@ -4,9 +4,9 @@ const FP = @import("FixedPoint.zig").FixedPoint(i16, 8, f16);
 const MAP_WIDTH = 24;
 const MAP_HEIGHT = 24;
 const SCREEN_WIDTH:usize = 128;
-const W = FP.init(SCREEN_WIDTH-1);
+const W = FP.initRaw(0x7FFF);
 const SCREEN_HEIGHT = 128;
-const H = FP.init(SCREEN_HEIGHT-1);
+const H = FP.initRaw(0x7FFF);
 const SCREEN_POINTER = RV32I.VRAM;
 const RGB_Red = 0xF800;
 const RGB_Green = 0x07E0;
@@ -95,7 +95,7 @@ pub export fn main() void {
                 color = color >> 1;
             }
             for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |p|{
-                SCREEN_POINTER[x<<7|p] = color;
+                SCREEN_POINTER[(p<<7) + x] = color;
             }
         }
         IO.frame_done(counter);
