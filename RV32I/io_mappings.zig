@@ -13,4 +13,7 @@ pub const IO = struct {
             putchar(c);
         }
     }
+    pub fn frame_done(done:u8)void{
+        RV32I.FRAME_DONE.* = done;
+    }
 };

@@ -1,7 +1,7 @@
 const std = @import("std");
 const assert = std.debug.assert;
 
-fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime InitFloat: type) type {
+pub fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime InitFloat: type) type {
     return struct {
         const FP = @This();
         raw: T,
@@ -32,7 +32,7 @@ fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime I
             return .{ .raw = (a.raw * b.raw) >> BinaryScaling };
         }
         pub fn div(a: FP, b: FP) FP {
-            return .{ .raw = (a.raw << BinaryScaling) / b.raw };
+            return .{ .raw = @divFloor(a.raw << BinaryScaling ,b.int()) };
         }
         pub fn neg(a: FP) FP {
             return .{ .raw = -a.raw };
@@ -57,13 +57,13 @@ fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, comptime I
             return if (a.raw > b.raw) a else b;
         }
         pub fn shr(a:FP, b:T) FP {
-            return .{ .raw = a.raw >> @as(u5, @intCast(b)) };
+            return .{ .raw = a.raw >> @as(u4, @intCast(b)) };
         }
         pub fn int(a:FP) T {
             return a.raw >> BinaryScaling;
         }
         pub fn abs(a:FP) FP {
-            return .{ .raw = @as(i32, @intCast(@abs(a.raw))) };
+            return .{ .raw = @as(T, @intCast(@abs(a.raw))) };
         }
         pub fn frac(a:FP) FP {
             return .{ .raw = a.raw & (std.math.maxInt(T) >> (BinaryScaling - @bitSizeOf(T))) };

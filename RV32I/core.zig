@@ -2,7 +2,7 @@ const root = @import("root");
 pub const RV32I = struct {
     fn bit_to_io(bit: usize) *volatile u8 {
         const offset = 1 << (bit + 2);
-        return @ptrFromInt(IO_BASE + offset);
+        return @ptrFromInt(IO_BASE + offset - 1);
     }
     const IO_LEDS_bit = 0;
     const IO_UART_DAT_bit = 1;
@@ -14,7 +14,9 @@ pub const RV32I = struct {
     const IO_MAX7219_DAT_bit = 7;
     const IO_SDCARD_bit = 8;
     const IO_BUTTONS_bit = 9;
+    const IO_FRAME_DONE_bit = 10;
     const IO_BASE = 0x01823000;
+    const VRAM_SIZE = 0x00020000;
     pub const LEDS = bit_to_io(IO_LEDS_bit);
     pub const UART_DAT = bit_to_io(IO_UART_DAT_bit);
     pub const UART_CNTL = bit_to_io(IO_UART_CNTL_bit);
@@ -25,6 +27,8 @@ pub const RV32I = struct {
     pub const MAX7219_DAT = bit_to_io(IO_MAX7219_DAT_bit);
     pub const SDCARD = bit_to_io(IO_SDCARD_bit);
     pub const BUTTONS = bit_to_io(IO_BUTTONS_bit);
+    pub const FRAME_DONE = bit_to_io(IO_FRAME_DONE_bit);
+    pub const VRAM:*[VRAM_SIZE>>1]u16 = @ptrFromInt(0x01800000);
     };
 export fn RV32IMain() linksection(".rv32imain") noreturn {
     asm volatile (

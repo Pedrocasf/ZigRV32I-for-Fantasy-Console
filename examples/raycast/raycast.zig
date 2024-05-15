@@ -1,11 +1,11 @@
 const RV32I = @import("rv32i").RV32I;
 const IO = @import("rv32i").IO;
-const FP = @import("FixedPoint.zig").FixedPoint(i32, 23, f32);
+const FP = @import("FixedPoint.zig").FixedPoint(i16, 8, f16);
 const MAP_WIDTH = 24;
 const MAP_HEIGHT = 24;
-const SCREEN_WIDTH:usize = 256;
+const SCREEN_WIDTH:usize = 128;
 const W = FP.init(SCREEN_WIDTH-1);
-const SCREEN_HEIGHT = 256;
+const SCREEN_HEIGHT = 128;
 const H = FP.init(SCREEN_HEIGHT-1);
 const SCREEN_POINTER = RV32I.VRAM;
 const RGB_Red = 0xF800;
@@ -20,11 +20,11 @@ pub export fn main() void {
     const dirX = FP.init(-1);
     const dirY = FP.init(0);
     const planeX = FP.init(0);
-    const planeY = FP.initRaw(0x00547ae1);
+    const planeY = FP.initRaw(0x00a9);
     var counter:u8 = 0;
     while (true) {
         for(0..SCREEN_WIDTH) |x|{
-            const cameraX = FP.init(@as(i32, @intCast(x))).shr(7);
+            const cameraX = FP.init(@as(i16, @intCast(x))).shr(6);
             const rayDirX = dirX.add((planeX.mul(cameraX)));
             const rayDirY = dirY.add((planeY.mul(cameraX)));
             var mapX = posX.int();
@@ -32,15 +32,15 @@ pub export fn main() void {
             var sideDistX = FP.initRaw(0);
             var sideDistY = FP.initRaw(0);
             const deltaDistX = if(rayDirX.eq(FP.initRaw(0)))
-            FP.initRaw(0x7FFFFFFF)
+            FP.initRaw(0x7FFF)
             else
             FP.init(1).div(rayDirX).abs();
             const deltaDistY = if(rayDirY.eq(FP.initRaw(0)))
-            FP.initRaw(0x7FFFFFFF)
+            FP.initRaw(0x7FFF)
             else
             FP.init(1).div(rayDirY).abs();
-            var stepX:i32 = 0;
-            var stepY:i32 = 0;
+            var stepX:i16 = 0;
+            var stepY:i16 = 0;
             var hit = false;
             var side = false;
             if(rayDirX.lt(FP.initRaw(0))){
@@ -95,7 +95,7 @@ pub export fn main() void {
                 color = color >> 1;
             }
             for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |p|{
-                SCREEN_POINTER[x<<8|p] = color;
+                SCREEN_POINTER[x<<7|p] = color;
             }
         }
         IO.frame_done(counter);
