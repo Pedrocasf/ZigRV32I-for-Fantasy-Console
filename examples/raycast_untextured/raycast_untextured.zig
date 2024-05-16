@@ -26,7 +26,6 @@ pub export fn main() void {
     var planeY = FP.initRaw(0x00A9);
     var counter:u8 = 0;
     while (true) {
-        @memset(SCREEN[0..SCREEN_WIDTH*SCREEN_HEIGHT], 0);
         for(0..SCREEN_WIDTH) |x|{
             const cameraX = FP.initRaw(@as(i16, @intCast(x<<2)));
             const rayDirX = dirX.add((planeX.mul(cameraX)));
@@ -101,7 +100,7 @@ pub export fn main() void {
                 SCREEN[(p << 7) | x] = color;
             }
         }
-        IO.frame_done(counter);
+        IO.swap_buffers(counter);
         counter = counter +% 1;
     }
 }

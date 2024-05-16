@@ -14,7 +14,7 @@ pub const RV32I = struct {
     const IO_MAX7219_DAT_bit = 7;
     const IO_SDCARD_bit = 8;
     const IO_BUTTONS_bit = 9;
-    const IO_FRAME_DONE_bit = 10;
+    const IO_SWAP_BUFFERS_bit = 10;
     const IO_BASE = 0x01823000;
     const VRAM_SIZE = 0x000023000;
     pub const LEDS = bit_to_io(IO_LEDS_bit);
@@ -27,7 +27,7 @@ pub const RV32I = struct {
     pub const MAX7219_DAT = bit_to_io(IO_MAX7219_DAT_bit);
     pub const SDCARD = bit_to_io(IO_SDCARD_bit);
     pub const BUTTONS = bit_to_io(IO_BUTTONS_bit);
-    pub const FRAME_DONE = bit_to_io(IO_FRAME_DONE_bit);
+    pub const SWAP_BUFFERS = bit_to_io(IO_SWAP_BUFFERS_bit);
     pub const VRAM =@as([*]align(2) volatile u16, @ptrFromInt(0x01800000));
 };
 export fn RV32IMain() linksection(".rv32imain") noreturn {
