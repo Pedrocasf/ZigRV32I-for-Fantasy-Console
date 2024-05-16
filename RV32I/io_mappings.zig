@@ -13,7 +13,7 @@ pub const IO = struct {
             putchar(c);
         }
     }
-    pub fn swap_buffers(done:u8)void{
-        RV32I.SWAP_BUFFERS.* = done;
+    pub fn swap_buffers()void{
+        RV32I.SWAP_BUFFERS.* = 1;
     }
 };

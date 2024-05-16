@@ -25,7 +25,6 @@ pub export fn main() void {
     var dirY = FP.ZERO;
     var planeX = FP.ZERO;
     var planeY = FP.initRaw(0x00A9);
-    var counter:u8 = 0;
     while (true) {
         for(0..SCREEN_WIDTH-1) |x|{
             const cameraX = FP.initRaw(@as(i16, @intCast(x<<2)));
@@ -95,7 +94,6 @@ pub export fn main() void {
                 SCREEN[(p << 7) | x] = color;
             }
         }
-        IO.swap_buffers(counter);
-        counter = counter +% 1;
+        IO.swap_buffers();
     }
 }
