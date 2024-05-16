@@ -28,7 +28,7 @@ pub const RV32I = struct {
     pub const SDCARD = bit_to_io(IO_SDCARD_bit);
     pub const BUTTONS = bit_to_io(IO_BUTTONS_bit);
     pub const FRAME_DONE = bit_to_io(IO_FRAME_DONE_bit);
-    pub const VRAM:*[VRAM_SIZE>>1]u16 = @ptrFromInt(0x01800000);
+    pub const VRAM =@as([*]align(2) volatile u16, @ptrFromInt(0x01800000));
 };
 export fn RV32IMain() linksection(".rv32imain") noreturn {
     asm volatile (
