@@ -8,11 +8,12 @@ const W = FP.initRaw(0x7F00);
 const SCREEN_HEIGHT = 128;
 const H = FP.initRaw(0x7F00);
 const SCREEN = RV32I.VRAM;
-const RGB_Red = 0x001F;
-const RGB_Green = 0x07E0;
-const RGB_Blue = 0xF800;
-const RGB_White = 0xFFFF;
-const RGB_Yellow = 0x07FF;
+const Red = 0x001F;
+const Green = 0x07E0;
+const Blue = 0xF800;
+const White = 0xFFFF;
+const Yellow = 0x07FF;
+const COLORS:[5]u16 = [5]u16{Red, Green, Blue, White, Yellow};
 const COS_ROTSPEED = FP.initRaw(0x00E1);
 const SIN_ROTSPEED = FP.initRaw(0x007B);
 const MOV_SPEED = FP.initRaw(0x00D5);
@@ -86,13 +87,7 @@ pub export fn main() void {
             const lineHeight = H.div(perpWallDist).clamp(FP.ZERO, H);
             const drawStart = lineHeight.neg().shr(1).add(H.shr(1));//.clamp(FP.ZERO, H.shr(1));
             const drawEnd = lineHeight.shr(1).add(H.shr(1));//.clamp(H.shr(1), H);
-            var color:u16 = switch (MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))]) {
-                0 => RGB_Red,
-                1 => RGB_Green,
-                2 => RGB_Blue,
-                3 => RGB_White,
-                else => RGB_Yellow
-            };
+            var color:u16 = COLORS[MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))]];
             if (side){
                 color = color >> 1;
             }
