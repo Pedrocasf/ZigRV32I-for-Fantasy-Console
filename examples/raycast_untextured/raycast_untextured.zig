@@ -2,7 +2,7 @@ const RV32I = @import("rv32i").RV32I;
 const IO = @import("rv32i").IO;
 const FP = @import("rv32i").FP(i16, 8, i32, u16);
 const MAP_SZ = 24;
-const SCREEN_SZ:usize = 256;
+const SCREEN_SZ = 256;
 const SZ = FP.initRaw(0x7FFF);
 const SCREEN = RV32I.VRAM;
 const Red = 0x001F;
@@ -93,7 +93,7 @@ pub export fn main() void {
             if (side){
                 color = color >> 1;
             }
-            for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |p|{
+            for(@as(usize, @intCast(drawStart))..@as(usize, @intCast(drawEnd))) |p|{
                 SCREEN[(x << 8) | p] = color;
             }
         }
