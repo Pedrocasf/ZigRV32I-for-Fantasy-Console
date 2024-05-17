@@ -90,7 +90,7 @@ pub export fn main() void {
             if (drawStart < 0) {
                 drawStart = 0;
             }
-            var drawEnd = (-lineHeight >> 1) + (SCREEN_HEIGHT >> 1);
+            var drawEnd = (lineHeight >> 1) + (SCREEN_HEIGHT >> 1);
             if (drawEnd > SCREEN_HEIGHT) {
                 drawEnd = SCREEN_HEIGHT - 1;
             }
