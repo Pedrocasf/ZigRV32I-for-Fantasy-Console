@@ -94,7 +94,7 @@ pub export fn main() void {
                 color = color >> 1;
             }
             for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |p|{
-                SCREEN[(p << 7) | x] = color;
+                SCREEN[(x << 8) | p] = color;
             }
         }
         IO.swap_buffers();
