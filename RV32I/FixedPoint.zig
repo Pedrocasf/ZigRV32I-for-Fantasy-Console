@@ -29,13 +29,13 @@ pub fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, compti
             return .{ .raw = a.raw -| b.raw };
         }
         pub fn mul(a: FP, b: FP) FP {
-            return .{ .raw = @as(T,@truncate((@as(TD,@intCast(a.raw)) * @as(TD,@intCast(b.raw))) >> BinaryScaling)) };
+            return .{ .raw = @as(T, @truncate((@as(TD, @intCast(a.raw)) * @as(TD, @intCast(b.raw))) >> BinaryScaling)) };
         }
         pub fn div(a: FP, b: FP) FP {
-            if(b.raw == 0){
-                return .{ .raw = std.math.maxInt(T)};
+            if (b.raw == 0) {
+                return .{ .raw = std.math.maxInt(T) };
             }
-            return .{ .raw = @as(T,@truncate(@divFloor(@as(TD,@intCast(a.raw)) << BinaryScaling ,@as(TD,@intCast(b.raw))))) };
+            return .{ .raw = @as(T, @truncate(@divFloor(@as(TD, @intCast(a.raw)) << BinaryScaling, @as(TD, @intCast(b.raw))))) };
         }
         pub fn neg(a: FP) FP {
             return .{ .raw = -%a.raw };
@@ -62,23 +62,23 @@ pub fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, compti
         pub fn max(a: FP, b: FP) FP {
             return if (a.raw > b.raw) a else b;
         }
-        pub fn shr(a:FP, b:T) FP {
+        pub fn shr(a: FP, b: T) FP {
             return .{ .raw = a.raw >> @as(std.math.Log2Int(T), @intCast(b)) };
         }
-        pub fn shl(a:FP, b:T) FP {
-            return .{ .raw = a.raw >> @as(std.math.Log2Int(T), @intCast(b)) };
+        pub fn shl(a: FP, b: T) FP {
+            return .{ .raw = a.raw << @as(std.math.Log2Int(T), @intCast(b)) };
         }
-        pub fn int(a:FP) T {
+        pub fn int(a: FP) T {
             return a.raw >> BinaryScaling;
         }
-        pub fn uint(a:FP) TU {
-            return @as(TU,@bitCast(a.raw)) >> BinaryScaling;
+        pub fn uint(a: FP) TU {
+            return @as(TU, @bitCast(a.raw)) >> BinaryScaling;
         }
-        pub fn abs(a:FP) FP {
+        pub fn abs(a: FP) FP {
             return .{ .raw = @as(T, @bitCast(@abs(a.raw))) };
         }
-        pub fn frac(a:FP) FP {
-            return .{ .raw = a.raw & 0x007F};
+        pub fn frac(a: FP) FP {
+            return .{ .raw = a.raw & 0x007F };
         }
         pub fn sin(x: FP) FP {
             var xr = x.raw;
