@@ -1,4 +1,4 @@
 zig-cache/
 zig-out/
 .idea/
-textures/*
+examples/raycast_textured/textures/*

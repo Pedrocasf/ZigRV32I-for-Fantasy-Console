@@ -65,6 +65,9 @@ pub fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, compti
         pub fn shr(a:FP, b:T) FP {
             return .{ .raw = a.raw >> @as(std.math.Log2Int(T), @intCast(b)) };
         }
+        pub fn shl(a:FP, b:T) FP {
+            return .{ .raw = a.raw >> @as(std.math.Log2Int(T), @intCast(b)) };
+        }
         pub fn int(a:FP) T {
             return a.raw >> BinaryScaling;
         }
@@ -75,7 +78,7 @@ pub fn FixedPoint(comptime T: type, comptime BinaryScaling: comptime_int, compti
             return .{ .raw = @as(T, @bitCast(@abs(a.raw))) };
         }
         pub fn frac(a:FP) FP {
-            return .{ .raw = a.raw & 0x00FF};
+            return .{ .raw = a.raw & 0x007F};
         }
         pub fn sin(x: FP) FP {
             var xr = x.raw;

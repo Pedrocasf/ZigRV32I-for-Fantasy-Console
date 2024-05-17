@@ -14,10 +14,24 @@ const Blue = 0xF800;
 const White = 0xFFFF;
 const Yellow = 0x07FF;
 const COLORS:[5]u16 = [5]u16{Red, Green, Blue, White, Yellow};
+const TEX_SZ = 64;
 const COS_ROTSPEED = FP.ONE;
 const SIN_ROTSPEED = FP.initRaw(0x0006);
 const MOV_SPEED = FP.initRaw(0x000A);
 const MAP: [MAP_WIDTH][MAP_HEIGHT]u8 = [MAP_WIDTH][MAP_HEIGHT]u8{ .{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 0, 0, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, .{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+const TEXTURES:[11]*const [TEX_SZ*TEX_SZ:0]u16 = [11]*const [TEX_SZ*TEX_SZ:0]u16{
+    @alignCast(@ptrCast(@embedFile("textures/eagle.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/redbrick.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/purplestone.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/greystone.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/bluestone.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/mossy.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/wood.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/colorstone.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/barrel.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/greenlight.png.raw"))),
+    @alignCast(@ptrCast(@embedFile("textures/pillar.png.raw")))
+};
 pub export fn main() void {
     var posX = FP.init(22);
     var posY = FP.init(12);
@@ -83,15 +97,29 @@ pub export fn main() void {
                 else
                     sideDistX.sub(deltaDistX);
 
-            const lineHeight = H.div(perpWallDist).clamp(FP.ZERO, H);
+            const lineHeight = H.div(perpWallDist).clamp(FP.initRaw(1), H);
             const drawStart = lineHeight.neg().shr(1).add(H.shr(1));//.clamp(FP.ZERO, H.shr(1));
             const drawEnd = lineHeight.shr(1).add(H.shr(1));//.clamp(H.shr(1), H);
-            var color:u16 = COLORS[MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))]];
-            if (side){
-                color = color >> 1;
+            const texNum = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))]-|1;
+            const wallX =
+                if(side)
+                    posX.add(perpWallDist.mul(rayDirX)).frac()
+                else
+                    posY.add(perpWallDist.mul(rayDirY)).frac();
+            var texX = @as(usize,@as(u16,@bitCast(wallX.shl(8).int())));
+            if((side and rayDirY.lt(FP.ZERO)) or ((!side) and rayDirX.gt(FP.ZERO))){
+                texX = TEX_SZ -| texX -| 1;
             }
-            for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |p|{
-                SCREEN[(x<<8) | p] = color;
+            const step = FP.init(TEX_SZ).div(lineHeight);
+            var texPos = drawStart.sub(H.shr(1)).add(lineHeight.shr(1)).mul(step);
+            for(@as(usize, @intCast(drawStart.int()))..@as(usize, @intCast(drawEnd.int()))) |y|{
+                const texY = @as(usize,@as(u16,@bitCast(texPos.int() & (TEX_SZ-1))));
+                texPos = texPos.add(step);
+                var color:u16 = TEXTURES[texNum][(texY<<8)+texX];
+                if (side){
+                    color = color >> 1;
+                }
+                SCREEN[(x<<8) | y] = color;
             }
         }
         IO.swap_buffers();
