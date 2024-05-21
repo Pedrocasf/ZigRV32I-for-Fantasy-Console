@@ -35,17 +35,17 @@ pub export fn main() void {
             const rayDirY = dirY.add((planeY.mul(cameraX)));
             var mapX = posX.int();
             var mapY = posY.int();
-            var sideDistX = FP.initRaw(0);
-            var sideDistY = FP.initRaw(0);
+            var sideDistX = FP.ZERO;
+            var sideDistY = FP.ZERO;
 
             const deltaDistX =
-                if (rayDirX.eq(FP.initRaw(0)))
+                if (rayDirX.eq(FP.ZERO))
                 FP.initRaw(0x7FFF)
             else
                 FP.ONE.div(rayDirX).abs();
 
             const deltaDistY =
-                if (rayDirY.eq(FP.initRaw(0)))
+                if (rayDirY.eq(FP.ZERO))
                 FP.initRaw(0x7FFF)
             else
                 FP.ONE.div(rayDirY).abs();
@@ -80,20 +80,20 @@ pub export fn main() void {
                 }
                 hit = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))] > 0;
             }
-            var perpWallDist =
+            const perpWallDist =
                 if (side)
                 sideDistY.sub(deltaDistY)
             else
                 sideDistX.sub(deltaDistX);
-            if (perpWallDist.eq(FP.ZERO)) {
-                perpWallDist = FP.ONE;
-            }
-            const lineHeight = H.div(perpWallDist);
-            var drawStart = lineHeight.shr(1).neg().add(HALF_H);
-            if (drawStart.lt(FP.ZERO)) {
-                drawStart = 0;
-            }
-            const drawEnd = lineHeight.neg().shr(1).add(HALF_H);
+
+            const lineHeight =
+                if (perpWallDist.eq(FP.ZERO))
+                    H
+                else
+                    H.div(perpWallDist);
+
+            const drawStart = lineHeight.shr(1).neg().add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
+            const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
             const texNum = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))] -% 1;
             const wallX =
                 if (side)
@@ -107,11 +107,11 @@ pub export fn main() void {
             const step = FP.init(TEX_SZ).div(lineHeight);
             var texPos = drawStart.sub(HALF_H).add(lineHeight.shr(1)).mul(step);
             for (drawStart.uint()..drawEnd.uint()) |y| {
-                const texY = @as(usize, @as(u16, @bitCast(texPos.uint() & (TEX_SZ - 1))));
+                const texY = texPos.uint() & (TEX_SZ - 1);
                 texPos = texPos.add(step);
                 var color: u16 = TEXTURES[texNum][(texY << 6) + texX];
                 if (side) {
-                    color = color >> 1 & 0x632C ;
+                    color = (color >> 1) & 0x632C;
                 }
                 SCREEN[(x << 8) | y] = color;
             }
