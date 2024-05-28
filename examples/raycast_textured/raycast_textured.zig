@@ -7,7 +7,7 @@ const SCREEN_WIDTH: usize = 256;
 const W = FP.initRaw(0x7FFF);
 const SCREEN_HEIGHT = 256;
 const H = FP.initRaw(0x7FFF);
-const HALF_H = FP.init(SCREEN_HEIGHT>>1);
+const HALF_H = FP.init(SCREEN_HEIGHT >> 1);
 const SCREEN = RV32I.VRAM;
 const Red = 0x001F;
 const Green = 0x07E0;
@@ -30,7 +30,7 @@ pub export fn main() void {
     var planeY = FP.initRaw(0x0055);
     while (true) {
         for (0..SCREEN_WIDTH - 1) |x| {
-            const cameraX = FP.initRaw(@as(i16, @intCast(x)));
+            const cameraX = FP.initRaw(@as(i16, @intCast(x))).sub(FP.ONE);
             const rayDirX = dirX.add((planeX.mul(cameraX)));
             const rayDirY = dirY.add((planeY.mul(cameraX)));
             var mapX = posX.int();
@@ -88,12 +88,12 @@ pub export fn main() void {
 
             const lineHeight =
                 if (perpWallDist.eq(FP.ZERO))
-                    H
-                else
-                    H.div(perpWallDist);
+                H
+            else
+                H.div(perpWallDist);
 
-            const drawStart = lineHeight.shr(1).neg().add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
-            const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
+            const drawStart = lineHeight.shr(1).neg().add(FP.init(HALF_H)).clamp(FP.ZERO, HALF_H);
+            const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT >> 1)).clamp(HALF_H, H);
             const texNum = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))] -% 1;
             const wallX =
                 if (side)
@@ -101,7 +101,10 @@ pub export fn main() void {
             else
                 posY.add(perpWallDist.mul(rayDirY)).frac();
             var texX = @as(usize, @as(u16, @bitCast(wallX.shl(6).int())));
-            if ((side and rayDirY.lt(FP.ZERO)) or ((!side) and rayDirX.gt(FP.ZERO))) {
+            if (side and rayDirY.lt(FP.ZERO)) {
+                texX = TEX_SZ -| texX -| 1;
+            }
+            if ((!side) and rayDirX.gt(FP.ZERO)) {
                 texX = TEX_SZ -| texX -| 1;
             }
             const step = FP.init(TEX_SZ).div(lineHeight);
