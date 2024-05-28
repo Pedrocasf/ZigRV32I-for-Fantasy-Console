@@ -15,8 +15,8 @@ pub const RV32I = struct {
     const IO_SDCARD_bit = 8;
     const IO_BUTTONS_bit = 9;
     const IO_SWAP_BUFFERS_bit = 10;
-    const IO_BASE = 0x01823000;
-    const VRAM_SIZE = 0x000023000;
+    const IO_BASE = 0x01820000;
+    const VRAM_SIZE = 0x000020000;
     pub const LEDS = bit_to_io(IO_LEDS_bit);
     pub const UART_DAT = bit_to_io(IO_UART_DAT_bit);
     pub const UART_CNTL = bit_to_io(IO_UART_CNTL_bit);
@@ -45,16 +45,16 @@ extern var __data_start__: u8;
 extern var __data_end__: u8;
 
 fn RV32IZigStartup() noreturn {
-    const bss_size:isize = @bitCast(@intFromPtr(&__bss_start__) - @intFromPtr(&__bss_end__));
+    const bss_size:isize = @bitCast(@intFromPtr(&__bss_end__) - @intFromPtr(&__bss_start__));
     // Clear .bss
     if(bss_size > 0){
-        @memset(@as([*]volatile u8, @ptrCast(&__bss_start__))[0..@bitCast(bss_size-1)], 0);
+        @memset(@as([*]volatile u8, @ptrCast(&__bss_start__))[0..@bitCast(bss_size)], 0);
     }
     
-    const data_size:isize = @bitCast(@intFromPtr(&__data_start__) - @intFromPtr(&__data_end__));
+    const data_size:isize = @bitCast(@intFromPtr(&__data_end__) - @intFromPtr(&__data_start__));
     // Copy .data section to PSRAM
     if(data_size > 0){
-        @memcpy(@as([*]volatile u8, @ptrCast(&__data_start__))[0..@bitCast(data_size-1)], @as([*]const u8, @ptrCast(&__data_lma))[0..@bitCast(data_size-1)]);
+        @memcpy(@as([*]volatile u8, @ptrCast(&__data_start__))[0..@bitCast(data_size)], @as([*]const u8, @ptrCast(&__data_lma))[0..@bitCast(data_size)]);
     }
     // call user's main
     if (@hasDecl(root, "main")) {

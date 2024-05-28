@@ -30,9 +30,9 @@ pub export fn main() void {
     var planeY = FP.initRaw(0x0055);
     while (true) {
         for (0..SCREEN_WIDTH - 1) |x| {
-            const cameraX = FP.initRaw(@as(i16, @intCast(x)));
-            const rayDirX = dirX.add((planeX.mul(cameraX)));
-            const rayDirY = dirY.add((planeY.mul(cameraX)));
+            const cameraX = FP.initRaw(@as(i16, @intCast(x))).sub(FP.ONE);
+            const rayDirX = dirX.add(planeX.mul(cameraX));
+            const rayDirY = dirY.add(planeY.mul(cameraX));
             var mapX = posX.int();
             var mapY = posY.int();
             var sideDistX = FP.ZERO;
@@ -92,8 +92,8 @@ pub export fn main() void {
                 else
                     H.div(perpWallDist);
 
-            const drawStart = lineHeight.shr(1).neg().add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
-            const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT>>1)).clamp(FP.ONE, H);
+            const drawStart = lineHeight.shr(1).neg().add(HALF_H).clamp(FP.ZERO, HALF_H);
+            const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT>>1)).clamp(HALF_H, H);
             const texNum = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))] -% 1;
             const wallX =
                 if (side)
@@ -101,14 +101,17 @@ pub export fn main() void {
             else
                 posY.add(perpWallDist.mul(rayDirY)).frac();
             var texX = @as(usize, @as(u16, @bitCast(wallX.shl(6).int())));
-            if ((side and rayDirY.lt(FP.ZERO)) or ((!side) and rayDirX.gt(FP.ZERO))) {
-                texX = TEX_SZ -| texX -| 1;
+            if (side and rayDirY.lt(FP.ZERO)) {
+                texX = TEX_SZ - texX - 1;
+            }
+            if (!side and rayDirX.gt(FP.ZERO)) {
+                texX = TEX_SZ - texX - 1;
             }
             const step = FP.init(TEX_SZ).div(lineHeight);
             var texPos = drawStart.sub(HALF_H).add(lineHeight.shr(1)).mul(step);
             for (drawStart.uint()..drawEnd.uint()) |y| {
                 const texY = texPos.uint() & (TEX_SZ - 1);
-                texPos = texPos.add(step);
+                texPos = texPos.add(step).clamp(FP.ZERO,  FP.init(TEX_SZ));
                 var color: u16 = TEXTURES[texNum][(texY << 6) + texX];
                 if (side) {
                     color = (color >> 1) & 0x632C;
