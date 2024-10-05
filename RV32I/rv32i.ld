@@ -1,7 +1,7 @@
 MEMORY {
-    flash : ORIGIN = 0x00000000, LENGTH = 16M
+    flash : ORIGIN = 0x00008000, LENGTH = 16M - 32K
     psram : ORIGIN = 0x01000000, LENGTH = 8M
-    isram : ORIGIN = 0x01800000, LENGTH = 140K
+    isram : ORIGIN = 0x01800000, LENGTH = 128K
 
 }
 
