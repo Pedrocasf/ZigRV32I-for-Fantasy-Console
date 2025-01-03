@@ -92,7 +92,7 @@ pub export fn main() void {
             else
                 H.div(perpWallDist);
 
-            const drawStart = lineHeight.shr(1).neg().add(FP.init(HALF_H)).clamp(FP.ZERO, HALF_H);
+            const drawStart = lineHeight.shr(1).neg().add(HALF_H).clamp(FP.ZERO, HALF_H);
             const drawEnd = lineHeight.shr(1).add(FP.init(SCREEN_HEIGHT >> 1)).clamp(HALF_H, H);
             const texNum = MAP[@as(usize, @intCast(mapX))][@as(usize, @intCast(mapY))] -% 1;
             const wallX =
