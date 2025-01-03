@@ -17,8 +17,8 @@ fn libRoot() []const u8 {
 }
 
 pub fn addRV32IStaticLibrary(b: *std.Build, libraryName: []const u8, sourceFile: []const u8, opt: std.builtin.OptimizeMode) *std.Build.Step.Compile {
-    const lib = b.addStaticLibrary(.{ .name = libraryName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = opt, .single_threaded = true });
-    lib.setLinkerScriptPath(.{ .path = RV32ILinkerScript });
+    const lib = b.addStaticLibrary(.{ .name = libraryName, .root_source_file = .{ .cwd_relative = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = opt, .single_threaded = true });
+    lib.setLinkerScript(.{ .cwd_relative = RV32ILinkerScript });
     return lib;
 }
 
@@ -44,9 +44,9 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
             break :blk newIsDebug;
         }
     };
-    const exe = b.addExecutable(.{ .name = rv32iName, .root_source_file = .{ .path = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = if(IsDebug) .Debug else .ReleaseFast, .single_threaded = true });
+    const exe = b.addExecutable(.{ .name = rv32iName, .root_source_file = .{ .cwd_relative = sourceFile }, .target = b.resolveTargetQuery(rv32i_target_query), .optimize = if(IsDebug) .Debug else .ReleaseFast, .single_threaded = true });
 
-    exe.setLinkerScriptPath(.{ .path = RV32ILinkerScript });
+    exe.setLinkerScript(.{ .cwd_relative = RV32ILinkerScript });
     if (ElfOrBin) {
         b.installArtifact(exe);
     } else {
@@ -62,7 +62,7 @@ pub fn addRV32IExecutable(b: *std.Build, rv32iName: []const u8, sourceFile: []co
     }
 
     const rv32iLib = createRV32ILib(b, if(IsDebug) .Debug else .ReleaseFast);
-    exe.root_module.addAnonymousImport("rv32i", .{ .root_source_file = .{ .path = RV32ILibFile } });
+    exe.root_module.addAnonymousImport("rv32i", .{ .root_source_file = .{ .cwd_relative = RV32ILibFile } });
     exe.linkLibrary(rv32iLib);
     b.default_step.dependOn(&exe.step);
     return exe;

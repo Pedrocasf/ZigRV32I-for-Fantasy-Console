@@ -30,12 +30,12 @@ pub const RV32I = struct {
     pub const SWAP_BUFFERS = bit_to_io(IO_SWAP_BUFFERS_bit);
     pub const VRAM = @as([*]align(2) volatile u16, @ptrFromInt(0x01800000));
 };
-export fn RV32IMain() linksection(".rv32imain") noreturn {
+export fn RV32IMain() linksection(".rv32imain") callconv(.Naked)  noreturn {
     asm volatile (
         \\la sp, __stack_top
         \\la gp, __global_pointer
+        \\j _RV32IZigStartup
     );
-    RV32IZigStartup();
 }
 
 extern var __bss_start__: u8;
@@ -44,7 +44,7 @@ extern var __data_lma: u8;
 extern var __data_start__: u8;
 extern var __data_end__: u8;
 
-fn RV32IZigStartup() noreturn {
+export fn _RV32IZigStartup() noreturn {
     const bss_size:isize = @bitCast(@intFromPtr(&__bss_start__) - @intFromPtr(&__bss_end__));
     // Clear .bss
     if(bss_size > 0){
