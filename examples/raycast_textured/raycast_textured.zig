@@ -1,11 +1,11 @@
 const RV32I = @import("rv32i").RV32I;
 const IO = @import("rv32i").IO;
-const FP = @import("rv32i").FP(i16, 7, i32, u16);
+const FP = @import("rv32i").FP(i16, 8, i32, u16);
 const MAP_WIDTH = 24;
 const MAP_HEIGHT = 24;
-const SCREEN_WIDTH: usize = 256;
+const SCREEN_WIDTH: usize = 128;
 const W = FP.initRaw(0x7FFF);
-const SCREEN_HEIGHT = 256;
+const SCREEN_HEIGHT = 128;
 const H = FP.initRaw(0x7FFF);
 const HALF_H = FP.init(SCREEN_HEIGHT >> 1);
 const SCREEN = RV32I.VRAM;
